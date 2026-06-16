@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from core.models import Autor, Categoria, Compra, Editora, Livro
+from core.models import Autor, Categoria, Compra, Editora, ItensCompra, Livro
 
 
 class UserAdmin(BaseUserAdmin):
@@ -51,6 +51,10 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
+    class ItensCompraInline(admin.TabularInline):
+        model = ItensCompra
+        extra = 1
+
     @admin.register(Autor)
     class AutorAdmin(admin.ModelAdmin):
         list_display = ('nome', 'email')
@@ -70,8 +74,11 @@ class UserAdmin(BaseUserAdmin):
     @admin.register(Compra)
     class CompraAdmin(admin.ModelAdmin):
         list_display = ('usuario', 'status')
+        search_fields = ('usuario', 'status')
+        list_filter = ('usuario', 'status')
         ordering = ('usuario', 'status')
         list_per_page = 10
+    inlines = [ItensCompraInline]
 
     @admin.register(Editora)
     class EditoraAdmin(admin.ModelAdmin):
