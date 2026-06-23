@@ -22,4 +22,4 @@ class CompraSerializer(ModelSerializer):
 
     class Meta:
         model = Compra
-        fields = '__all__'
+        ffields = ('id', 'usuario', 'status', 'total', 'itens')
