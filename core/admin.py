@@ -7,6 +7,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Autor, Categoria, Compra, Editora, ItensCompra, Livro
+from django.contrib.admin.options import ModelAdmin
 
 
 class UserAdmin(BaseUserAdmin):
@@ -72,13 +73,17 @@ class UserAdmin(BaseUserAdmin):
         list_per_page = 10
 
     @admin.register(Compra)
-    class CompraAdmin(admin.ModelAdmin):
-        list_display = ('usuario', 'status')
-        search_fields = ('usuario', 'status')
-        list_filter = ('usuario', 'status')
+    class CompraAdmin(ModelAdmin):
+        list_display = ('usuario', 'status', 'total_formatado')  # mostra na listagem
         ordering = ('usuario', 'status')
         list_per_page = 10
     inlines = [ItensCompraInline]
+    readonly_fields = ("total_formatado",)  # mostra dentro do formulário
+
+    @admin.display(description="Total")
+    def total_formatado(self, obj):
+        """Exibe R$ 123,45 em vez de 123.45."""
+        return f"R$ {obj.total:.2f}"
 
     @admin.register(Editora)
     class EditoraAdmin(admin.ModelAdmin):
