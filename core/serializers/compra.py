@@ -3,6 +3,20 @@ from rest_framework.serializers import CharField, ModelSerializer, SerializerMet
 from core.models import Compra, ItensCompra
 
 
+class ItensCompraCreateUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = ItensCompra
+        fields = ('livro', 'quantidade')
+
+
+class CompraCreateUpdateSerializer(ModelSerializer):
+    itens = ItensCompraCreateUpdateSerializer(many=True)
+
+    class Meta:
+        model = Compra
+        fields = ('usuario', 'itens')
+
+
 class ItensCompraSerializer(ModelSerializer):
     total = SerializerMethodField()
 

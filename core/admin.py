@@ -2,6 +2,8 @@
 Django admin customization.
 """
 
+from atexit import register
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -72,11 +74,11 @@ class UserAdmin(BaseUserAdmin):
         ordering = ('descricao',)
         list_per_page = 10
 
-    @admin.register(Compra)
+    @register(Compra)
     class CompraAdmin(ModelAdmin):
         list_display = ('usuario', 'status', 'total_formatado')  # mostra na listagem
-        ordering = ('usuario', 'status')
-        list_per_page = 10
+    ordering = ('usuario', 'status')
+    list_per_page = 10
     inlines = [ItensCompraInline]
     readonly_fields = ("total_formatado",)  # mostra dentro do formulário
 
