@@ -2,14 +2,17 @@
 Django admin customization.
 """
 
-from atexit import register
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Autor, Categoria, Compra, Editora, ItensCompra, Livro
 from django.contrib.admin.options import ModelAdmin
+
+
+class ItensCompraInline(admin.TabularInline):
+    model = ItensCompra
+    extra = 1
 
 
 class UserAdmin(BaseUserAdmin):
@@ -54,10 +57,6 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
-    class ItensCompraInline(admin.TabularInline):
-        model = ItensCompra
-        extra = 1
-
     @admin.register(Autor)
     class AutorAdmin(admin.ModelAdmin):
         list_display = ('nome', 'email')
@@ -74,19 +73,6 @@ class UserAdmin(BaseUserAdmin):
         ordering = ('descricao',)
         list_per_page = 10
 
-    @register(Compra)
-    class CompraAdmin(ModelAdmin):
-        list_display = ('usuario', 'status', 'total_formatado')  # mostra na listagem
-    ordering = ('usuario', 'status')
-    list_per_page = 10
-    inlines = [ItensCompraInline]
-    readonly_fields = ("total_formatado",)  # mostra dentro do formulário
-
-    @admin.display(description="Total")
-    def total_formatado(self, obj):
-        """Exibe R$ 123,45 em vez de 123.45."""
-        return f"R$ {obj.total:.2f}"
-
     @admin.register(Editora)
     class EditoraAdmin(admin.ModelAdmin):
         list_display = ('nome', 'email', 'cidade')
@@ -102,3 +88,24 @@ class UserAdmin(BaseUserAdmin):
         list_filter = ('editora', 'categoria')
         ordering = ('titulo', 'editora', 'categoria')
         list_per_page = 25
+
+
+@admin.register(Compra)
+class CompraAdmin(ModelAdmin):
+    list_display = (
+        'usuario',
+        'status',
+        'total_formatado',
+        'data_criacao',
+        'data_atualizacao',
+    )
+    ordering = ('usuario', 'status', 'data_criacao')
+    search_fields = ('usuario__email', 'status')
+    list_filter = ('status', 'data_criacao')
+    list_per_page = 10
+    inlines = [ItensCompraInline]
+    readonly_fields = ('data_criacao', 'data_atualizacao', 'total_formatado')
+
+    @admin.display(description='Total')
+    def total_formatado(self, obj):
+        return f'R$ {obj.total:.2f}'
