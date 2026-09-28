@@ -51,3 +51,13 @@ class LivroMaisVendidoSerializer(ModelSerializer):
     class Meta:
         model = Livro
         fields = ('id', 'titulo', 'total_vendidos')
+
+
+class LivroAjustarEstoqueSerializer(Serializer):
+    quantidade = IntegerField()
+
+    def validate_quantidade(self, quantidade):
+        livro = self.context.get('livro')
+        if livro and (livro.quantidade or 0) + quantidade < 0:
+            raise ValidationError('A quantidade em estoque não pode ser negativa.')
+        return quantidade

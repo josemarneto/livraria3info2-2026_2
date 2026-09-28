@@ -1,5 +1,6 @@
 from django.db.models import Q, Sum
-from drf_spectacular.utils import extend_schema
+from django.db import transaction
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from core.models import Compra, Livro
 from core.serializers import (
+    LivroAjustarEstoqueSerializer,
     LivroAlterarPrecoSerializer,
     LivroListRetrieveSerializer,
     LivroMaisVendidoSerializer,
@@ -67,3 +69,49 @@ class LivroViewSet(ModelViewSet):
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary='Ajusta o estoque de um livro',
+        description='Aumenta ou diminui o estoque; impede resultado negativo.',
+        request=LivroAjustarEstoqueSerializer,
+        responses={
+            200: OpenApiResponse(
+                description='Estoque ajustado com sucesso.',
+                examples=[
+                    OpenApiExample(
+                        'Ajuste concluído',
+                        value={'status': 'Quantidade ajustada com sucesso', 'novo_estoque': 30},
+                    )
+                ],
+            ),
+            400: OpenApiResponse(
+                description='Erro de validação.',
+                examples=[
+                    OpenApiExample(
+                        'Estoque negativo',
+                        value={'quantidade': ['A quantidade em estoque não pode ser negativa.']},
+                    )
+                ],
+            ),
+        },
+    )
+    @action(detail=True, methods=['post'])
+    @transaction.atomic
+    def ajustar_estoque(self, request, pk=None):
+        livro = self.get_object()
+        livro = Livro.objects.select_for_update().get(pk=livro.pk)
+        serializer = LivroAjustarEstoqueSerializer(
+            data=request.data,
+            context={'livro': livro},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        livro.quantidade = (livro.quantidade or 0) + serializer.validated_data['quantidade']
+        livro.save(update_fields=('quantidade',))
+        return Response(
+            {
+                'status': 'Quantidade ajustada com sucesso',
+                'novo_estoque': livro.quantidade,
+            },
+            status=status.HTTP_200_OK,
+        )
