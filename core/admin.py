@@ -95,13 +95,14 @@ class CompraAdmin(ModelAdmin):
     list_display = (
         'usuario',
         'status',
+            'tipo_pagamento',
         'total_formatado',
         'data_criacao',
         'data_atualizacao',
     )
     ordering = ('usuario', 'status', 'data_criacao')
     search_fields = ('usuario__email', 'status')
-    list_filter = ('status', 'data_criacao')
+    list_filter = ('status', 'data_criacao', 'tipo_pagamento')
     list_per_page = 10
     inlines = [ItensCompraInline]
     readonly_fields = ('data_criacao', 'data_atualizacao', 'total_formatado')
