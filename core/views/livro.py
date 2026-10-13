@@ -1,5 +1,6 @@
 from django.db.models import Q, Sum
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -19,6 +20,8 @@ from core.serializers import (
 class LivroViewSet(ModelViewSet):
     queryset = Livro.objects.all()
     serializer_class = LivroSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['categoria__descricao', 'editora__nome', 'autores__nome']
 
     def get_serializer_class(self):
         if self.action in {'list', 'retrieve'}:

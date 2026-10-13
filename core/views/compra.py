@@ -2,6 +2,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -16,6 +17,8 @@ from core.serializers import CompraCreateUpdateSerializer, CompraListSerializer,
 class CompraViewSet(ModelViewSet):
     queryset = Compra.objects.all()
     serializer_class = CompraSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status', 'tipo_pagamento', 'data_criacao', 'usuario']
 
     def get_serializer_class(self):
         if self.action == 'list':
