@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 
 from .livro import Livro
@@ -25,14 +27,21 @@ class Compra(models.Model):
     status = models.IntegerField(choices=StatusCompra.choices, default=StatusCompra.CARRINHO)
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tipo_pagamento = models.IntegerField(
         choices=TipoPagamento.choices,
         default=TipoPagamento.CARTAO_CREDITO,
     )
 
-    @property
-    def total(self):
-        return sum(item.preco * item.quantidade for item in self.itens.all())
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.total = sum(
+                (item.preco * item.quantidade for item in self.itens.all()),
+                Decimal('0.00'),
+            )
+            if kwargs.get('update_fields'):
+                kwargs['update_fields'] = set(kwargs['update_fields']) | {'total'}
+        super().save(*args, **kwargs)
 
 
 class ItensCompra(models.Model):

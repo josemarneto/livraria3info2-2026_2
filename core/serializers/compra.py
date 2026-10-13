@@ -35,11 +35,27 @@ class CompraCreateUpdateSerializer(ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        itens = validated_data.pop('itens', [])
-        compra = Compra.objects.create(**validated_data)
+        itens = validated_data.pop('itens')
+        usuario = validated_data['usuario']
+
+        compra, _ = Compra.objects.get_or_create(
+            usuario=usuario,
+            status=Compra.StatusCompra.CARRINHO,
+            defaults=validated_data,
+        )
+
         for item in itens:
-            item['preco'] = item['livro'].preco
-            ItensCompra.objects.create(compra=compra, **item)
+            item_existente = compra.itens.filter(livro=item['livro']).first()
+
+            if item_existente:
+                item_existente.quantidade += item['quantidade']
+                item_existente.preco = item['livro'].preco
+                item_existente.save()
+            else:
+                item['preco'] = item['livro'].preco
+                ItensCompra.objects.create(compra=compra, **item)
+
+        compra.save()
         return compra
 
     @transaction.atomic
@@ -54,7 +70,7 @@ class CompraCreateUpdateSerializer(ModelSerializer):
 
     class Meta:
         model = Compra
-        fields = ('id', 'usuario', 'itens')
+        fields = ('usuario', 'itens')
 
 
 class ItensCompraSerializer(ModelSerializer):
