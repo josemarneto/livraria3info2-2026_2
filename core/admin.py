@@ -3,11 +3,11 @@ Django admin customization.
 """
 
 from django.contrib import admin
+from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Autor, Categoria, Compra, Editora, ItensCompra, Livro
-from django.contrib.admin.options import ModelAdmin
 
 
 class ItensCompraInline(admin.TabularInline):
@@ -37,7 +37,7 @@ class UserAdmin(BaseUserAdmin):
         (_('Groups'), {'fields': ('groups',)}),
         (_('User Permissions'), {'fields': ('user_permissions',)}),
     )
-    (_('Personal Info'), {'fields': ('name', 'foto')}),
+    ((_('Personal Info'), {'fields': ('name', 'foto')}),)
     readonly_fields = ['last_login']
     add_fieldsets = (
         (
@@ -95,7 +95,7 @@ class CompraAdmin(ModelAdmin):
     list_display = (
         'usuario',
         'status',
-            'tipo_pagamento',
+        'tipo_pagamento',
         'total_formatado',
         'data_criacao',
         'data_atualizacao',

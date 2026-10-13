@@ -1,5 +1,5 @@
-from django.db.models import Q, Sum
 from django.db import transaction
+from django.db.models import Q, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import status
@@ -56,7 +56,8 @@ class LivroViewSet(ModelViewSet):
     @action(detail=False, methods=['get'])
     def mais_vendidos(self, request):
         livros = (
-            Livro.objects.annotate(
+            Livro.objects
+            .annotate(
                 total_vendidos=Sum(
                     'itens_compra__quantidade',
                     filter=Q(itens_compra__compra__status=Compra.StatusCompra.FINALIZADO),

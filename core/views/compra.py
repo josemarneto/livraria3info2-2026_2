@@ -2,8 +2,8 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.db import transaction
-from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -83,8 +83,7 @@ class CompraViewSet(ModelViewSet):
             quantidades[item.livro_id] += item.quantidade
 
         livros = {
-            livro.pk: livro
-            for livro in Livro.objects.select_for_update().filter(pk__in=quantidades).order_by('pk')
+            livro.pk: livro for livro in Livro.objects.select_for_update().filter(pk__in=quantidades).order_by('pk')
         }
         for livro_id, quantidade in quantidades.items():
             livro = livros[livro_id]

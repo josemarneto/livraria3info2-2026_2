@@ -13,10 +13,8 @@ class UserSerializer(ModelSerializer):
         required=False,
         write_only=True,
     )
-    foto = ImageSerializer(
-        required=False,
-        read_only=True
-    )
+    foto = ImageSerializer(required=False, read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -29,7 +27,8 @@ class UserSerializer(ModelSerializer):
             'is_staff',
             'is_superuser',
             'last_login',
-            'groups')
+            'groups',
+        )
         depth = 1
 
 

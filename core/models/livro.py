@@ -25,4 +25,4 @@ class Livro(models.Model):
     )
 
     def __str__(self):
-        return f"{self.titulo} - {', '.join([autor.nome for autor in self.autores.all()])}"
+        return f'{self.titulo} - {", ".join([autor.nome for autor in self.autores.all()])}'
